@@ -1,0 +1,2400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DewAI</title>
+  <style>
+    :root {
+      --bg1: #f5f3ff;
+      --bg2: #ffffff;
+      --bg3: #ede9fe;
+      --card: #ffffff;
+      --text: #0a0a0a;
+      --muted: #52525b;
+      --border: #e4e4e7;
+      --primary: #7c3aed;
+      --primary-dark: #5b21b6;
+      --secondary: #a855f7;
+      --warning: #8b5cf6;
+      --success: #7c3aed;
+      --danger: #dc2626;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 24px;
+    }
+
+    body.dark {
+      --bg1: #0b0b0f;
+      --bg2: #101019;
+      --bg3: #161625;
+      --card: #151522;
+      --text: #ececf4;
+      --muted: #b0b3c3;
+      --border: #2a2d3a;
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --secondary: #a78bfa;
+      --warning: #8b5cf6;
+      --success: #8b5cf6;
+      --danger: #f87171;
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(to bottom, var(--bg1), var(--bg2), var(--bg3));
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1200px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 20px 0 40px;
+    }
+
+    .hidden { display: none !important; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 24px;
+      min-height: 88vh;
+      align-items: center;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-left h1 {
+      font-size: clamp(2.2rem, 5vw, 4.6rem);
+      line-height: 1.05;
+      margin: 14px 0;
+      font-weight: 900;
+    }
+
+    .hero-left p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      max-width: 680px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .stats-grid {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      max-width: 720px;
+    }
+
+    .stat-pill {
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--card) 92%, var(--bg3) 8%);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .auth-card {
+      padding: 28px;
+    }
+
+    .auth-card h2 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .auth-card p {
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field input, .coach-box textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .field input:focus, .coach-box textarea:focus {
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 4px rgba(14,165,233,.12);
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 18px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px) scale(1.01);
+      filter: brightness(1.03);
+    }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+      box-shadow: 0 14px 28px rgba(124, 58, 237, 0.22);
+    }
+
+    .btn-secondary {
+      background: color-mix(in srgb, var(--card) 92%, var(--bg3) 8%);
+      color: var(--text);
+      border: 1px solid var(--border);
+      margin-top: 10px;
+    }
+
+    .btn-secondary:hover {
+      background: color-mix(in srgb, var(--card) 82%, var(--bg3) 18%);
+    }
+
+    .note {
+      margin-top: 16px;
+      background: color-mix(in srgb, var(--card) 92%, var(--bg3) 8%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      font-size: .95rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .error {
+      margin-bottom: 12px;
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      border-radius: 16px;
+      padding: 12px;
+      font-size: .95rem;
+    }
+
+    .app-shell {
+      padding-top: 10px;
+    }
+
+    .topbar {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--bg3) 8%) 0%, color-mix(in srgb, var(--card) 88%, var(--bg3) 12%) 100%);
+      backdrop-filter: blur(10px);
+    }
+
+    .top-left h1 {
+      margin-top: 10px;
+      font-size: 2rem;
+    }
+
+    .top-left p {
+      color: var(--muted);
+      margin-top: 6px;
+      max-width: 620px;
+      line-height: 1.5;
+    }
+
+    .top-right {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .progress-wrap {
+      margin-top: 16px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .95rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--card) 72%, #d4d4d8 28%);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      width: 0%;
+      transition: width .25s ease;
+      box-shadow: 0 0 18px rgba(139, 92, 246, 0.28);
+    }
+
+    .tabs {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--card) 90%, var(--bg3) 10%);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 28%, var(--card) 72%), color-mix(in srgb, var(--secondary) 22%, var(--card) 78%));
+      color: var(--text);
+      border-color: #6d5bb3;
+      box-shadow: 0 10px 22px rgba(124, 58, 237, 0.18);
+    }
+
+    .tab-content {
+      margin-top: 20px;
+    }
+
+    .section-card {
+      padding: 22px;
+      margin-bottom: 18px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--card) 94%, var(--bg3) 6%) 0%, color-mix(in srgb, var(--card) 88%, var(--bg3) 12%) 100%);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .section-icon {
+      min-width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+      border: 1px solid color-mix(in srgb, var(--border) 70%, var(--primary) 30%);
+    }
+
+    .orange { background: color-mix(in srgb, var(--primary) 18%, var(--card) 82%); }
+    .sky { background: color-mix(in srgb, var(--secondary) 20%, var(--card) 80%); }
+    .yellow { background: color-mix(in srgb, var(--primary) 12%, var(--card) 88%); }
+    .violet { background: color-mix(in srgb, var(--secondary) 24%, var(--card) 76%); }
+    .emerald { background: color-mix(in srgb, var(--primary) 16%, var(--card) 84%); }
+
+    .section-header p {
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .lessons-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .lesson-card {
+      border: 2px solid var(--border);
+      border-radius: 28px;
+      padding: 22px;
+      background: linear-gradient(180deg, var(--card) 0%, color-mix(in srgb, var(--card) 86%, var(--bg3) 14%) 100%);
+      min-height: 340px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 24px rgba(124, 58, 237, 0.10);
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .lesson-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 34px rgba(124, 58, 237, 0.16);
+      border-color: #6d5bb3;
+    }
+
+    .lesson-top {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .lesson-card p {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      min-height: 120px;
+      margin-bottom: 18px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .mini-badge {
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: .8rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .mini-ok {
+      background: color-mix(in srgb, var(--primary) 16%, var(--card) 84%);
+      color: #c4b5fd;
+      border-color: #7c6bb8;
+    }
+
+    .mini-lock {
+      background: color-mix(in srgb, var(--card) 88%, #3f3f46 12%);
+      color: var(--muted);
+      border-color: var(--border);
+    }
+
+    .mini-open {
+      background: color-mix(in srgb, var(--card) 94%, var(--bg3) 6%);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .lesson-btn {
+      width: 100%;
+      border: none;
+      border-radius: 18px;
+      padding: 14px;
+      font-weight: 800;
+      font-size: 1rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      cursor: pointer;
+      margin-top: auto;
+      box-shadow: 0 12px 26px rgba(124, 58, 237, 0.22);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .lesson-btn:disabled {
+      background: #cbd5e1;
+      color: #475569;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    .lesson-btn:hover {
+      transform: translateY(-2px) scale(1.01);
+      filter: brightness(1.03);
+      box-shadow: 0 16px 30px rgba(124, 58, 237, 0.28);
+    }
+
+    .tab-btn:hover {
+      transform: translateY(-2px);
+      border-color: #8b5cf6;
+      box-shadow: 0 10px 22px rgba(124, 58, 237, 0.14);
+    }
+
+    .btn:active,
+    .lesson-btn:active,
+    .tab-btn:active,
+    .option:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    .coach-card, .ranking-card, .profile-card {
+      padding: 22px;
+    }
+
+    .coach-messages {
+      background: color-mix(in srgb, var(--card) 94%, var(--bg3) 6%);
+      border-radius: 24px;
+      padding: 16px;
+      max-height: 420px;
+      overflow: auto;
+      margin: 16px 0;
+      border: 1px solid var(--border);
+    }
+
+    .msg {
+      width: fit-content;
+      max-width: 85%;
+      padding: 12px 14px;
+      border-radius: 18px;
+      margin-bottom: 10px;
+      line-height: 1.5;
+      font-size: .95rem;
+    }
+
+    .msg.ai {
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .msg.user {
+      margin-left: auto;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 72%, #111 28%), color-mix(in srgb, var(--secondary) 68%, #111 32%));
+      color: #ffffff;
+    }
+
+    .coach-actions {
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .coach-box textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .ranking-list, .profile-grid {
+      margin-top: 16px;
+    }
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--card) 94%, var(--bg3) 6%);
+      margin-bottom: 10px;
+    }
+
+    .ranking-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .rank-box {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--primary) 14%, var(--card) 86%);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: var(--text);
+      border: 1px solid color-mix(in srgb, var(--border) 70%, var(--primary) 30%);
+    }
+
+    .ranking-sub, .profile-sub {
+      color: var(--muted);
+      font-size: .92rem;
+      margin-top: 4px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, .55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      z-index: 999;
+    }
+
+    .modal.show { display: flex; }
+
+    .modal-card {
+      width: min(800px, 100%);
+      padding: 24px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .modal-header p {
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .close-btn {
+      width: auto;
+      padding: 12px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .question-title {
+      margin: 20px 0 14px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, border-color .18s ease, background .18s ease;
+      background: var(--card);
+      color: var(--text);
+    }
+
+    .option:hover {
+      transform: translateY(-2px);
+      border-color: #8b5cf6;
+      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.10);
+    }
+    .option.selected { border-color: var(--text); background: #f8fafc; }
+    .option.correct { border-color: #34d399; background: #ecfdf5; }
+    .option.wrong { border-color: #f87171; background: #fef2f2; }
+
+    .feedback {
+      margin-top: 14px;
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 14px;
+      line-height: 1.5;
+      color: #334155;
+      display: none;
+    }
+
+    .feedback.show { display: block; }
+
+    .modal-actions {
+      margin-top: 18px;
+      display: flex;
+      justify-content: end;
+      gap: 10px;
+    }
+
+    code {
+      background: color-mix(in srgb, var(--bg3) 60%, var(--card) 40%);
+      padding: 0.2rem 0.4rem;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    pre {
+      background: color-mix(in srgb, var(--bg3) 70%, var(--card) 30%);
+      padding: 14px;
+      border-radius: 20px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 1024px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 20px; }
+      .topbar { flex-direction: column; align-items: stretch; }
+      .top-right { grid-template-columns: repeat(2, 1fr); }
+      .lessons-grid { grid-template-columns: repeat(2, 1fr); }
+      .profile-grid { grid-template-columns: repeat(2, 1fr); }
+      .tabs { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 700px) {
+      .stats-grid, .tabs, .lessons-grid, .profile-grid, .coach-actions, .top-right {
+        grid-template-columns: 1fr;
+      }
+      .auth-card { padding: 20px; }
+      .container { width: min(100%, calc(100% - 16px)); }
+      .section-card, .coach-card, .ranking-card, .profile-card, .modal-card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section id="authScreen" class="hero">
+      <div class="hero-left">
+        <div class="badge">DewAI • ensino com IA</div>
+        <h1>Aprenda desenvolvimento web com a DewAI, do zero ao avançado.</h1>
+        <p>
+          A DewAI é uma plataforma gamificada com energia Web, trilha crescente de dificuldade,
+          quizzes, score, ranking e mentor IA para HTML, CSS e JavaScript.
+        </p>
+
+        <div class="stats-grid">
+          <div class="stat-pill">
+            <div class="stat-label">Estilo</div>
+            <div class="stat-value">Gamificado</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-label">Auxílio</div>
+            <div class="stat-value">IA</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-label">Progresso</div>
+            <div class="stat-value">Score</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card auth-card">
+        <h2 id="authTitle">Entrar</h2>
+        <p id="authDesc">Entre na sua jornada na DewAI.</p>
+
+        <div id="authError" class="error hidden"></div>
+
+        <div id="nameField" class="field hidden">
+          <input type="text" id="nameInput" placeholder="Seu nome" />
+        </div>
+
+        <div class="field">
+          <input type="email" id="emailInput" placeholder="Seu email" />
+        </div>
+
+        <div class="field">
+          <input type="password" id="passwordInput" placeholder="Sua senha" />
+        </div>
+
+        <button id="authMainBtn" class="btn btn-primary">Entrar</button>
+        <button id="authToggleBtn" class="btn btn-secondary">Ainda não tenho conta</button>
+
+        <div class="note">
+          <strong>Nota técnica:</strong> esta versão em HTML salva dados no navegador com localStorage.
+          Para produção, o ideal é usar backend real, banco de dados e senhas com hash seguro.
+        </div>
+      </div>
+    </section>
+
+    <section id="appScreen" class="app-shell hidden">
+      <div class="card topbar">
+        <div class="top-left">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <div class="badge">DewAI</div>
+            <div id="rankBadge" class="badge">Iniciante</div>
+          </div>
+          <h1 id="welcomeText">Olá</h1>
+          <p>Na DewAI, você aprende em cápsulas curtas, com dificuldade crescente e explicações guiadas por IA.</p>
+
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span>Trilha concluída</span>
+              <span id="progressText">0/0 lições</span>
+            </div>
+            <div class="progress-bar">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="top-right">
+          <div class="stat-pill">
+            <div class="stat-label">Score</div>
+            <div class="stat-value" id="scoreValue">0</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-label">Nível</div>
+            <div class="stat-value" id="levelValue">1</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-label">Precisão</div>
+            <div class="stat-value" id="accuracyValue">0%</div>
+          </div>
+          <button id="themeToggleBtn" class="btn btn-secondary" style="height:100%; margin-top:0;">🌙 Modo escuro</button>
+          <button id="logoutBtn" class="btn btn-secondary" style="height:100%; margin-top:0;">Sair</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="learn">Aprender</button>
+        <button class="tab-btn" data-tab="coach">Mentor IA</button>
+        <button class="tab-btn" data-tab="ranking">Ranking</button>
+        <button class="tab-btn" data-tab="profile">Perfil</button>
+        <button class="tab-btn" data-tab="explanation">Explicação</button>
+      </div>
+
+      <div class="tab-content">
+        <div id="tab-learn"></div>
+
+        <div id="tab-coach" class="hidden">
+          <div class="card coach-card">
+            <h2>Mentor IA</h2>
+            <div class="profile-sub">Tire dúvidas, peça explicações, revisão de conceitos e ideias de projeto.</div>
+
+            <div id="coachMessages" class="coach-messages"></div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin: 8px 0 14px;">
+              <button id="simplifyCoachBtn" class="btn btn-secondary" style="width:auto; margin-top:0;">Explicar mais simples</button>
+              <button id="exerciseCoachBtn" class="btn btn-secondary" style="width:auto; margin-top:0;">Me dá exercício</button>
+            </div>
+
+            <div class="coach-actions">
+              <div class="coach-box">
+                <textarea id="coachInput" placeholder="Ex: me explica flexbox, me passa um projeto de HTML e CSS, por que usar semântica?"></textarea>
+              </div>
+              <button id="sendCoachBtn" class="btn btn-primary">Perguntar à IA</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-ranking" class="hidden">
+          <div class="card ranking-card">
+            <h2>Ranking</h2>
+            <div class="profile-sub">Top estudantes por score.</div>
+            <div id="rankingList" class="ranking-list"></div>
+          </div>
+        </div>
+
+        <div id="tab-profile" class="hidden">
+          <div class="card profile-card">
+            <h2>Seu perfil</h2>
+            <div class="profile-sub">Resumo do seu progresso.</div>
+            <div class="profile-grid">
+              <div class="stat-pill">
+                <div class="stat-label">Score total</div>
+                <div class="stat-value" id="profileScore">0</div>
+              </div>
+              <div class="stat-pill">
+                <div class="stat-label">Lições concluídas</div>
+                <div class="stat-value" id="profileLessons">0</div>
+              </div>
+              <div class="stat-pill">
+                <div class="stat-label">Nível atual</div>
+                <div class="stat-value" id="profileLevel">1</div>
+              </div>
+              <div class="stat-pill">
+                <div class="stat-label">Questões certas</div>
+                <div class="stat-value" id="profileCorrect">0/0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-explanation" class="hidden">
+          <div class="card section-card">
+            <div class="section-header">
+              <div class="section-icon emerald">📘</div>
+              <div>
+                <h2>Guia essencial: HTML + CSS + JavaScript</h2>
+                <p>Os três pilares do front-end moderno. Cada um tem um papel único.</p>
+              </div>
+            </div>
+            <div class="lessons-grid" style="margin-top:16px;">
+              <div class="lesson-card">
+                <div class="lesson-top">
+                  <div>
+                    <h3>🌐 HTML (estrutura)</h3>
+                    <div class="profile-sub">Esqueleto e conteúdo</div>
+                  </div>
+                  <div class="mini-badge mini-open">base</div>
+                </div>
+                <p>Define títulos, parágrafos, imagens, links e formulários. Tags como <code>&lt;h1&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, <code>&lt;section&gt;</code> organizam a informação.</p>
+                <pre style="font-size:0.75rem;">&lt;main&gt;
+  &lt;h1&gt;Olá mundo&lt;/h1&gt;
+  &lt;p&gt;Minha primeira página&lt;/p&gt;
+&lt;/main&gt;</pre>
+                <div class="profile-sub">✔️ Semântica melhora acessibilidade e SEO.</div>
+              </div>
+              <div class="lesson-card">
+                <div class="lesson-top">
+                  <div>
+                    <h3>🎨 CSS (estilo)</h3>
+                    <div class="profile-sub">Design, cores, layout</div>
+                  </div>
+                  <div class="mini-badge mini-open">essencial</div>
+                </div>
+                <p>Seletores, propriedades, box model, flexbox e grid. Transforma o HTML em algo visualmente atraente.</p>
+                <pre style="font-size:0.75rem;">.card {
+  background: white;
+  padding: 20px;
+  border-radius: 24px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}</pre>
+                <div class="profile-sub">✔️ Separa estrutura de apresentação.</div>
+              </div>
+              <div class="lesson-card">
+                <div class="lesson-top">
+                  <div>
+                    <h3>⚡ JavaScript (comportamento)</h3>
+                    <div class="profile-sub">Interatividade, lógica</div>
+                  </div>
+                  <div class="mini-badge mini-open">dinâmico</div>
+                </div>
+                <p>Adiciona eventos, manipula o DOM, consome APIs, valida formulários. Torna a página reativa.</p>
+                <pre style="font-size:0.75rem;">document.querySelector('button').onclick = () => {
+  alert('Você clicou!');
+};</pre>
+                <div class="profile-sub">✔️ Front-end dinâmico e assíncrono.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card section-card">
+            <div class="section-header">
+              <div class="section-icon emerald">🧩</div>
+              <div>
+                <h2>Como HTML, CSS e JavaScript se integram</h2>
+                <p>Cada tecnologia atua em uma camada, mas juntas criam experiências completas.</p>
+              </div>
+            </div>
+            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+              <div class="stat-pill">
+                <div class="stat-label">HTML</div>
+                <div class="stat-value">🗂️ Conteúdo</div>
+                <div class="ranking-sub">Define o que existe na página.</div>
+              </div>
+              <div class="stat-pill">
+                <div class="stat-label">CSS</div>
+                <div class="stat-value">🎨 Aparência</div>
+                <div class="ranking-sub">Como o conteúdo é mostrado.</div>
+              </div>
+              <div class="stat-pill">
+                <div class="stat-label">JavaScript</div>
+                <div class="stat-value">⚙️ Comportamento</div>
+                <div class="ranking-sub">Reage a ações e atualiza dados.</div>
+              </div>
+            </div>
+            <p style="margin-top: 16px;"><strong>Exemplo prático:</strong> Um formulário de cadastro usa HTML para os campos, CSS para deixar bonito e JS para validar o email antes de enviar. Juntos, entregam usabilidade e feedback instantâneo.</p>
+            <pre style="margin-top: 12px;">&lt;!-- HTML --&gt;
+&lt;input id="email" type="email" /&gt;
+&lt;button id="btn"&gt;Enviar&lt;/button&gt;
+
+/* CSS */
+input { border: 2px solid #ccc; transition: 0.2s; }
+
+// JavaScript
+document.getElementById('btn').onclick = () => {
+  alert('validando...');
+};</pre>
+          </div>
+
+          <div class="card section-card">
+            <div class="section-header">
+              <div class="section-icon emerald">📌</div>
+              <div>
+                <h2>Resumo para evolução</h2>
+                <p>O que cada tecnologia resolve sozinha e quando combiná-las.</p>
+              </div>
+            </div>
+            <ul style="margin-left: 24px; line-height: 1.8; color: var(--muted);">
+              <li><strong>HTML</strong> → cria a arquitetura da página (títulos, textos, botões).</li>
+              <li><strong>CSS</strong> → aplica estilo, responsividade, animações e layout responsivo.</li>
+              <li><strong>JavaScript</strong> → gerencia eventos, requisições assíncronas e altera o DOM dinamicamente.</li>
+              <li>Juntas: <strong>SPA</strong>, sites responsivos, jogos, dashboards interativos.</li>
+            </ul>
+            <div class="note" style="margin-top: 18px;">✨ Dica DewAI: Aprenda primeiro HTML, depois CSS e então JavaScript. Pratique construindo pequenos componentes. Use o Mentor IA para tirar dúvidas específicas!</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="quizModal" class="modal">
+    <div class="card modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 id="quizLessonTitle">Lição</h2>
+          <p id="quizStepText">Questão 1 de 1</p>
+        </div>
+        <button id="closeQuizBtn" class="btn close-btn">Fechar</button>
+      </div>
+
+      <div class="progress-bar">
+        <div id="quizProgressFill" class="progress-fill"></div>
+      </div>
+
+      <div id="questionTitle" class="question-title"></div>
+      <div id="optionsBox" class="options"></div>
+      <div id="feedbackBox" class="feedback"></div>
+
+      <div class="modal-actions">
+        <button id="quizActionBtn" class="btn btn-primary">Responder</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_USERS = 'dewai_users_v1';
+    const STORAGE_SESSION = 'dewai_session_v1';
+    const STORAGE_THEME = 'dewai_theme_v1';
+
+    const learningPath = [
+      {
+        id: 'html',
+        title: 'HTML',
+        icon: 'H',
+        color: 'orange',
+        lessons: [
+          {
+            id: 'html-1',
+            title: 'Introdução ao HTML',
+            difficulty: 1,
+            content: 'HTML é a estrutura da página. Pense nele como o esqueleto do site. Tags como <h1>, <p> e <button> organizam o conteúdo.',
+            questions: [
+              {
+                q: 'Qual linguagem define a estrutura de uma página web?',
+                options: ['CSS', 'HTML', 'JavaScript', 'SQL'],
+                answer: 1,
+                explanation: 'HTML organiza a estrutura e o conteúdo da página.'
+              },
+              {
+                q: 'Qual tag normalmente representa o título principal?',
+                options: ['<p>', '<h1>', '<div>', '<span>'],
+                answer: 1,
+                explanation: '<h1> é usada para o título principal.'
+              }
+            ]
+          },
+          {
+            id: 'html-2',
+            title: 'Tags semânticas',
+            difficulty: 2,
+            content: 'Tags semânticas ajudam o navegador e o desenvolvedor a entender o conteúdo. Exemplos: <header>, <main>, <section>, <footer>.',
+            questions: [
+              {
+                q: 'Qual tag é mais semântica para o conteúdo principal da página?',
+                options: ['<main>', '<div>', '<b>', '<i>'],
+                answer: 0,
+                explanation: '<main> representa o conteúdo principal do documento.'
+              },
+              {
+                q: 'Qual destas tags é semântica?',
+                options: ['<div>', '<span>', '<section>', '<font>'],
+                answer: 2,
+                explanation: '<section> é uma tag semântica para agrupar conteúdos relacionados.'
+              }
+            ]
+          },
+          {
+            id: 'html-3',
+            title: 'Formulários',
+            difficulty: 3,
+            content: 'Formulários coletam dados do usuário. Elementos importantes: <form>, <input>, <label>, <button>.',
+            questions: [
+              {
+                q: 'Qual elemento cria um campo de texto?',
+                options: ['<label>', '<form>', '<input>', '<header>'],
+                answer: 2,
+                explanation: '<input> cria campos para entrada de dados.'
+              },
+              {
+                q: 'Qual tag associa texto descritivo a um campo?',
+                options: ['<label>', '<section>', '<main>', '<ul>'],
+                answer: 0,
+                explanation: '<label> descreve o campo e melhora acessibilidade.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'css',
+        title: 'CSS',
+        icon: 'C',
+        color: 'sky',
+        lessons: [
+          {
+            id: 'css-1',
+            title: 'Seletores e estilo básico',
+            difficulty: 2,
+            content: 'CSS estiliza a página. Você pode mudar cores, tamanhos, espaçamentos e layout.',
+            questions: [
+              {
+                q: 'Qual propriedade muda a cor do texto?',
+                options: ['background', 'font-weight', 'color', 'border'],
+                answer: 2,
+                explanation: 'A propriedade color altera a cor do texto.'
+              },
+              {
+                q: 'Qual seletor representa uma classe?',
+                options: ['#titulo', '.card', 'header', '*'],
+                answer: 1,
+                explanation: 'Classes são selecionadas com ponto, como .card.'
+              }
+            ]
+          },
+          {
+            id: 'css-2',
+            title: 'Box Model',
+            difficulty: 3,
+            content: 'Todo elemento pode ser visto como uma caixa com conteúdo, padding, border e margin.',
+            questions: [
+              {
+                q: 'O que fica entre o conteúdo e a borda?',
+                options: ['margin', 'padding', 'display', 'position'],
+                answer: 1,
+                explanation: 'Padding é o espaço interno entre conteúdo e borda.'
+              },
+              {
+                q: 'Qual propriedade cria espaço externo?',
+                options: ['padding', 'gap', 'margin', 'border-radius'],
+                answer: 2,
+                explanation: 'Margin é o espaço externo do elemento.'
+              }
+            ]
+          },
+          {
+            id: 'css-3',
+            title: 'Flexbox',
+            difficulty: 4,
+            content: 'Flexbox facilita alinhar e distribuir elementos em linha ou coluna.',
+            questions: [
+              {
+                q: 'Qual valor coloca os itens em linha?',
+                options: ['display: block', 'display: flex', 'position: absolute', 'float: center'],
+                answer: 1,
+                explanation: 'display: flex ativa o Flexbox.'
+              },
+              {
+                q: 'Qual propriedade alinha itens no eixo principal?',
+                options: ['justify-content', 'z-index', 'font-size', 'overflow'],
+                answer: 0,
+                explanation: 'justify-content distribui itens no eixo principal.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'js',
+        title: 'JavaScript',
+        icon: 'J',
+        color: 'yellow',
+        lessons: [
+          {
+            id: 'js-1',
+            title: 'Variáveis e tipos',
+            difficulty: 3,
+            content: 'JavaScript adiciona lógica e interatividade. Variáveis podem ser criadas com let e const.',
+            questions: [
+              {
+                q: 'Qual palavra cria uma variável que pode mudar?',
+                options: ['const', 'let', 'static', 'style'],
+                answer: 1,
+                explanation: 'let cria variáveis reatribuíveis.'
+              },
+              {
+                q: 'Qual destas é uma string?',
+                options: ['42', 'true', "'Olá'", 'null'],
+                answer: 2,
+                explanation: 'Strings são textos, geralmente entre aspas.'
+              }
+            ]
+          },
+          {
+            id: 'js-2',
+            title: 'Condicionais e loops',
+            difficulty: 4,
+            content: 'if, else e loops ajudam a controlar o fluxo do programa.',
+            questions: [
+              {
+                q: 'Qual estrutura repete uma ação várias vezes?',
+                options: ['if', 'for', 'const', 'return'],
+                answer: 1,
+                explanation: 'for é uma estrutura de repetição.'
+              },
+              {
+                q: 'Qual palavra testa uma condição?',
+                options: ['case', 'map', 'if', 'await'],
+                answer: 2,
+                explanation: 'if avalia condições.'
+              }
+            ]
+          },
+          {
+            id: 'js-3',
+            title: 'DOM e eventos',
+            difficulty: 5,
+            content: 'O DOM representa a página no JavaScript. Eventos como click permitem reagir às ações do usuário.',
+            questions: [
+              {
+                q: 'Qual evento detecta clique?',
+                options: ['hover', 'submit', 'click', 'drag'],
+                answer: 2,
+                explanation: 'click é usado para capturar cliques.'
+              },
+              {
+                q: 'O que o DOM representa?',
+                options: ['Banco de dados do navegador', 'Estrutura da página na memória', 'Velocidade da internet', 'Um framework CSS'],
+                answer: 1,
+                explanation: 'O DOM é a estrutura da página acessível pelo JavaScript.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'advanced',
+        title: 'Avançado',
+        icon: 'A',
+        color: 'violet',
+        lessons: [
+          {
+            id: 'adv-1',
+            title: 'APIs e JSON',
+            difficulty: 6,
+            content: 'APIs permitem que o front-end converse com serviços externos. JSON é um formato comum de troca de dados.',
+            questions: [
+              {
+                q: 'Qual formato é muito usado para trocar dados com APIs?',
+                options: ['PDF', 'JSON', 'PNG', 'MP3'],
+                answer: 1,
+                explanation: 'JSON é leve e muito usado em APIs web.'
+              },
+              {
+                q: 'fetch é usado para quê?',
+                options: ['Criar imagens', 'Fazer requisições HTTP', 'Editar CSS', 'Compilar HTML'],
+                answer: 1,
+                explanation: 'fetch faz requisições para APIs e outros endpoints.'
+              }
+            ]
+          },
+          {
+            id: 'adv-2',
+            title: 'Autenticação e segurança',
+            difficulty: 7,
+            content: 'Sistemas reais usam autenticação segura, hash de senha, sessão e proteção contra ataques comuns.',
+            questions: [
+              {
+                q: 'Em produção, senhas devem ser armazenadas como:',
+                options: ['Texto puro', 'Print na tela', 'Hash seguro', 'Nome do usuário'],
+                answer: 2,
+                explanation: 'Senhas devem ser armazenadas com hash seguro, nunca em texto puro.'
+              },
+              {
+                q: 'Qual prática ajuda a proteger contas?',
+                options: ['Senha curta 1234', 'Hash + validação segura', 'Expor banco no front-end', 'Salvar tudo em localStorage sem backend'],
+                answer: 1,
+                explanation: 'Hash de senha e autenticação segura são práticas importantes.'
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    const flatLessons = learningPath.flatMap(section => section.lessons);
+
+
+    const mentorKnowledge = {
+      html: {
+        title: 'HTML',
+        keywords: ['html', 'tag', 'tags', 'estrutura', 'pagina', 'página', 'site', '<h1>', '<p>', '<button>', 'elemento'],
+        intro: 'HTML é a base estrutural da página. Ele organiza o conteúdo e diz o que cada parte representa.',
+        beginner: [
+          'HTML monta a estrutura do site, como títulos, textos, imagens e botões.',
+          'Cada parte da página vira um elemento marcado por tags.',
+          'Sem HTML, o CSS e o JavaScript não teriam onde agir.'
+        ],
+        intermediate: [
+          'HTML descreve o papel de cada bloco da interface.',
+          'Uma boa estrutura facilita estilo, manutenção e acessibilidade.',
+          'O navegador lê esse esqueleto antes de aplicar aparência e interação.'
+        ],
+        advanced: [
+          'HTML bem estruturado melhora acessibilidade, SEO e organização do DOM.',
+          'Escolher elementos corretos reduz ambiguidade e acoplamento com CSS/JS.',
+          'Estrutura consistente torna a interface mais previsível para ferramentas e pessoas.'
+        ],
+        example: '<h1>Meu site</h1>\n<p>Bem-vindo.</p>\n<button>Clique</button>',
+        exercise: 'Monte uma página com um título, um parágrafo e um botão.',
+        project: 'Crie uma landing page simples com cabeçalho, seção principal e rodapé.'
+      },
+      semantic: {
+        title: 'Tags semânticas',
+        keywords: ['tag semantica', 'tag semântica', 'tags semanticas', 'tags semânticas', 'semantica', 'semântica', 'semantico', 'semântico', 'semantic', 'header', 'main', 'section', 'article', 'footer', 'nav', 'aside'],
+        intro: 'Tags semânticas ajudam a mostrar o significado do conteúdo, e não só a forma dele na tela.',
+        beginner: [
+          'Em vez de usar só <div> para tudo, você pode usar tags que explicam a função de cada parte.',
+          'Exemplos comuns: <header>, <main>, <section>, <article>, <footer> e <nav>.',
+          'Isso deixa o código mais claro para quem lê e para o navegador.'
+        ],
+        intermediate: [
+          'Semântica melhora organização do HTML e facilita manutenção.',
+          'Leitores de tela e mecanismos de busca entendem melhor a página quando os papéis estão claros.',
+          'Nem toda seção precisa ser <section>; escolha a tag pelo significado real do conteúdo.'
+        ],
+        advanced: [
+          'Semântica correta ajuda navegação assistiva, landmarks e entendimento estrutural do documento.',
+          'Ela reduz divs genéricas e comunica intenção arquitetural no markup.',
+          'O ganho não é visual por si só, mas estrutural, semântico e de acessibilidade.'
+        ],
+        example: '<header>Topo</header>\n<main>\n  <section>Conteúdo</section>\n</main>\n<footer>Rodapé</footer>',
+        exercise: 'Reescreva uma página feita com várias <div> usando <header>, <main>, <section> e <footer>.',
+        project: 'Monte a estrutura semântica de uma página de notícias com menu, conteúdo principal e rodapé.'
+      },
+      forms: {
+        title: 'Formulários',
+        keywords: ['formulario', 'formulário', 'form', 'input', 'label', 'enviar', 'cadastro', 'placeholder'],
+        intro: 'Formulários servem para coletar dados do usuário, como nome, email, senha ou buscas.',
+        beginner: [
+          'O <form> agrupa os campos.',
+          '<input> cria áreas para digitar ou selecionar dados.',
+          '<label> descreve o campo e deixa a interface mais clara.'
+        ],
+        intermediate: [
+          'Bons formulários organizam campos, rótulos e botões de envio.',
+          'Associar label ao input melhora acessibilidade e usabilidade.',
+          'Cada tipo de input resolve uma necessidade diferente.'
+        ],
+        advanced: [
+          'Formulários bem modelados ajudam validação, UX e acessibilidade.',
+          'A relação entre label, name, type e feedback de erro é parte do design do sistema.',
+          'Estruturar bem desde o HTML simplifica integração com JS e backend.'
+        ],
+        example: '<form>\n  <label for="nome">Nome</label>\n  <input id="nome" type="text">\n  <button>Enviar</button>\n</form>',
+        exercise: 'Crie um formulário com nome, email e botão de enviar.',
+        project: 'Faça uma tela de cadastro com campos bem rotulados e botão de envio.'
+      },
+      css: {
+        title: 'CSS',
+        keywords: ['css', 'estilo', 'estilizar', 'cor', 'fonte', 'classe', 'seletor', '.card', '#id'],
+        intro: 'CSS controla a aparência da página, como cores, espaçamentos, bordas e layout.',
+        beginner: [
+          'Se o HTML é o esqueleto, o CSS é a aparência.',
+          'Com CSS você muda cor, tamanho, margem e posição dos elementos.',
+          'Seletores dizem quais elementos vão receber o estilo.'
+        ],
+        intermediate: [
+          'CSS organiza a apresentação sem misturar isso com a estrutura do HTML.',
+          'Classes ajudam a reaproveitar estilos em vários elementos.',
+          'Entender seletor e cascata evita muita confusão.'
+        ],
+        advanced: [
+          'CSS bem escrito reduz duplicação e melhora manutenção visual.',
+          'A combinação de seletor, especificidade e cascata define o resultado final.',
+          'Pensar em escala desde cedo evita folha de estilo caótica.'
+        ],
+        example: 'h1 { color: purple; }\n.card { padding: 16px; border-radius: 12px; }',
+        exercise: 'Estilize um título e um cartão com cor, padding e borda arredondada.',
+        project: 'Monte uma página pessoal simples e estilize cabeçalho, cards e botões.'
+      },
+      boxmodel: {
+        title: 'Box Model',
+        keywords: ['box model', 'padding', 'margin', 'border', 'conteudo', 'conteúdo', 'caixa'],
+        intro: 'No CSS, quase todo elemento funciona como uma caixa com conteúdo, padding, borda e margem.',
+        beginner: [
+          'Conteúdo é a parte central.',
+          'Padding é o espaço interno entre conteúdo e borda.',
+          'Margin é o espaço externo entre um elemento e outro.'
+        ],
+        intermediate: [
+          'Muitos problemas de layout nascem de confundir padding com margin.',
+          'A borda envolve o conteúdo e o padding.',
+          'Pensar na caixa inteira ajuda a prever o tamanho real do elemento.'
+        ],
+        advanced: [
+          'Dominar box model é base para layouts consistentes.',
+          'O cálculo visual do elemento depende da soma entre conteúdo, padding, border e margin.',
+          'Entender isso reduz ajustes no escuro.'
+        ],
+        example: '.card { padding: 16px; border: 1px solid #ccc; margin: 20px; }',
+        exercise: 'Crie um card com padding interno, borda e espaço externo.',
+        project: 'Monte uma grade de cards com espaçamento bem controlado.'
+      },
+      flexbox: {
+        title: 'Flexbox',
+        keywords: ['flexbox', 'flex', 'justify-content', 'align-items', 'display flex', 'alinhar', 'layout'],
+        intro: 'Flexbox é uma forma prática de alinhar e distribuir elementos em linha ou coluna.',
+        beginner: [
+          'Você ativa com display: flex.',
+          'justify-content organiza os itens no eixo principal.',
+          'align-items organiza os itens no eixo cruzado.'
+        ],
+        intermediate: [
+          'Flexbox resolve menus, cards em linha e centralizações com menos gambiarra.',
+          'Direção, espaçamento e alinhamento ficam mais previsíveis.',
+          'É ótimo para layouts de uma dimensão.'
+        ],
+        advanced: [
+          'Flexbox é forte para distribuição linear e adaptação responsiva simples.',
+          'Pensar em eixo principal e eixo cruzado elimina muita tentativa e erro.',
+          'Para estruturas bidimensionais maiores, grid pode ser melhor.'
+        ],
+        example: '.container { display: flex; justify-content: center; align-items: center; gap: 12px; }',
+        exercise: 'Centralize dois botões lado a lado usando flexbox.',
+        project: 'Crie uma barra de navegação com logo à esquerda e links à direita.'
+      },
+      js: {
+        title: 'JavaScript',
+        keywords: ['javascript', 'js', 'script', 'interatividade', 'variavel', 'variável', 'let', 'const'],
+        intro: 'JavaScript adiciona lógica e interatividade à página.',
+        beginner: [
+          'Ele faz a página reagir a cliques, envios, mudanças e cálculos.',
+          'Com let e const você guarda valores para usar no código.',
+          'É a parte que dá comportamento ao que o HTML mostra.'
+        ],
+        intermediate: [
+          'JavaScript conecta interface, regras e dados.',
+          'Ele lê elementos da página, processa ações e atualiza o DOM.',
+          'Entender bem variáveis e fluxo é o começo de tudo.'
+        ],
+        advanced: [
+          'JavaScript coordena estado, eventos e comunicação com APIs.',
+          'Uma base sólida em linguagem evita confusão ao crescer o projeto.',
+          'O ideal é escrever lógica clara, previsível e fácil de testar.'
+        ],
+        example: 'const botao = document.querySelector("button");\nbotao.addEventListener("click", () => alert("Oi"));',
+        exercise: 'Faça um botão que mostre uma mensagem ao ser clicado.',
+        project: 'Monte uma mini calculadora ou contador interativo.'
+      },
+      conditionals: {
+        title: 'Condicionais e loops',
+        keywords: ['if', 'else', 'for', 'while', 'loop', 'repeticao', 'repetição', 'condicional'],
+        intro: 'Condicionais e loops controlam o fluxo do programa.',
+        beginner: [
+          'if testa se algo é verdadeiro.',
+          'else define o que acontece no outro caso.',
+          'for repete uma ação várias vezes.'
+        ],
+        intermediate: [
+          'Essas estruturas fazem o código tomar decisões e repetir tarefas.',
+          'Sem elas, o programa fica engessado.',
+          'O segredo é ler passo a passo e acompanhar os valores.'
+        ],
+        advanced: [
+          'Fluxo de controle é a espinha da lógica de programação.',
+          'Pensar nos cenários de entrada e saída evita bugs escondidos.',
+          'Clareza aqui vale mais que truques compactos.'
+        ],
+        example: 'if (idade >= 18) {\n  console.log("Maior de idade");\n} else {\n  console.log("Menor de idade");\n}',
+        exercise: 'Crie um if que mostre se um número é positivo ou negativo.',
+        project: 'Faça um verificador simples de nota aprovado/reprovado.'
+      },
+      dom: {
+        title: 'DOM e eventos',
+        keywords: ['dom', 'evento', 'eventos', 'click', 'clique', 'addEventListener', 'querySelector', 'document'],
+        intro: 'O DOM é a representação da página que o JavaScript consegue ler e alterar.',
+        beginner: [
+          'Com querySelector você encontra elementos da página.',
+          'Com addEventListener você reage a ações, como clique.',
+          'Isso permite mudar texto, cor, classes e muito mais.'
+        ],
+        intermediate: [
+          'DOM é a ponte entre o código e a interface.',
+          'Eventos transformam ações do usuário em comportamento do sistema.',
+          'Grande parte do front-end nasce dessa conversa entre DOM e eventos.'
+        ],
+        advanced: [
+          'Entender DOM e eventos ajuda a projetar interfaces mais previsíveis.',
+          'Manipulação excessiva pode ficar confusa se a estrutura não estiver limpa.',
+          'Boas abstrações evitam acoplamento exagerado com a marcação.'
+        ],
+        example: 'const titulo = document.querySelector("h1");\ntitulo.textContent = "Novo título";',
+        exercise: 'Crie um botão que troque o texto de um título ao clicar.',
+        project: 'Faça uma lista de tarefas simples com botão de adicionar item.'
+      },
+      api: {
+        title: 'APIs e JSON',
+        keywords: ['api', 'json', 'fetch', 'requisição', 'requisicao', 'backend', 'dados'],
+        intro: 'APIs permitem que o front-end converse com outros serviços e receba dados.',
+        beginner: [
+          'Uma API é como uma porta de comunicação entre sistemas.',
+          'JSON é um formato comum para enviar e receber dados.',
+          'fetch é muito usado para fazer requisições no navegador.'
+        ],
+        intermediate: [
+          'Ao consumir uma API, seu site pode mostrar dados externos dinamicamente.',
+          'Você envia uma requisição e recebe uma resposta.',
+          'Normalmente a resposta vem em JSON.'
+        ],
+        advanced: [
+          'APIs ligam o front-end à lógica e aos dados do sistema.',
+          'Compreender request, response, status e parsing reduz erros de integração.',
+          'A arquitetura cresce melhor quando fronteiras entre cliente e servidor estão claras.'
+        ],
+        example: 'fetch("/api/alunos")\n  .then(r => r.json())\n  .then(data => console.log(data));',
+        exercise: 'Explique com suas palavras a diferença entre uma página estática e uma que busca dados de uma API.',
+        project: 'Monte uma tela que exiba dados de usuários vindos de uma API fake.'
+      },
+      auth: {
+        title: 'Autenticação e segurança',
+        keywords: ['seguranca', 'segurança', 'senha', 'hash', 'login', 'autenticacao', 'autenticação', 'sessao', 'sessão'],
+        intro: 'Autenticação confirma quem é o usuário. Segurança protege dados e acessos.',
+        beginner: [
+          'Login serve para identificar quem está entrando no sistema.',
+          'Senhas não devem ser guardadas em texto puro em sistemas reais.',
+          'Back-end é a parte responsável por validar isso com segurança.'
+        ],
+        intermediate: [
+          'Sistemas seguros usam hash, sessão ou tokens e validações adequadas.',
+          'Nem tudo deve ficar no front-end.',
+          'Segurança é parte do projeto, não um detalhe para depois.'
+        ],
+        advanced: [
+          'Autenticação mal desenhada compromete todo o sistema.',
+          'Separar responsabilidades entre cliente e servidor é essencial.',
+          'Boas práticas reduzem exposição de credenciais e ataques comuns.'
+        ],
+        example: 'No front-end você envia email e senha. O servidor valida e devolve a sessão com segurança.',
+        exercise: 'Explique por que guardar senha em texto puro é perigoso.',
+        project: 'Desenhe o fluxo de login de um site com front-end e backend.'
+      }
+    };
+
+    const mentorQuestionBank = {
+      html: [
+        "o que é html?",
+        "para que serve html?",
+        "html é linguagem de programação?",
+        "como funciona a estrutura de uma página html?",
+        "o que são tags no html?",
+        "qual a diferença entre html e css?",
+        "qual a diferença entre html e javascript?",
+        "como criar um título em html?",
+        "como criar um parágrafo em html?",
+        "como colocar imagem em html?",
+        "como colocar link em html?",
+        "como criar botão em html?",
+        "como quebrar linha em html?",
+        "como fazer lista em html?",
+        "como funciona o head e o body?",
+        "o que vai dentro do body?",
+        "como montar a estrutura básica do html?",
+        "por onde começo a aprender html?"
+      ],
+      semantic: [
+        "o que é tag semântica?",
+        "o que são tags semânticas?",
+        "por que usar semântica no html?",
+        "qual a diferença entre div e section?",
+        "qual a diferença entre section e article?",
+        "quando usar header?",
+        "quando usar main?",
+        "quando usar nav?",
+        "quando usar footer?",
+        "quando usar aside?",
+        "como organizar uma página com tags semânticas?",
+        "usar tag semântica melhora seo?",
+        "tag semântica melhora acessibilidade?",
+        "toda página precisa de main?",
+        "posso usar div junto com tags semânticas?",
+        "qual a função do article?",
+        "qual a função do section?",
+        "qual a função do header?",
+        "qual a função do footer?",
+        "me dá um exemplo de estrutura semântica"
+      ],
+      forms: [
+        "o que é formulário em html?",
+        "como criar um formulário?",
+        "para que serve a tag form?",
+        "qual a função do input?",
+        "qual a função do label?",
+        "como fazer campo de email?",
+        "como fazer campo de senha?",
+        "como criar botão de enviar?",
+        "como ligar label com input?",
+        "o que é placeholder?",
+        "qual a diferença entre label e placeholder?",
+        "como validar campo obrigatório?",
+        "como fazer checkbox em html?",
+        "como fazer radio em html?",
+        "como criar textarea?",
+        "como pegar dados do formulário com javascript?",
+        "como montar tela de cadastro?",
+        "como fazer formulário acessível?"
+      ],
+      css: [
+        "o que é css?",
+        "para que serve css?",
+        "como mudar cor com css?",
+        "como mudar fonte com css?",
+        "o que é seletor no css?",
+        "qual a diferença entre classe e id?",
+        "como estilizar um botão?",
+        "como estilizar um card?",
+        "como centralizar com css?",
+        "como colocar margem com css?",
+        "como colocar padding com css?",
+        "o que é cascata no css?",
+        "o que é especificidade?",
+        "como funciona herança no css?",
+        "como usar classe no css?",
+        "como usar id no css?",
+        "como deixar a página bonita com css?",
+        "como trocar background com css?"
+      ],
+      boxmodel: [
+        "o que é box model?",
+        "o que é padding?",
+        "o que é margin?",
+        "o que é border?",
+        "qual a diferença entre padding e margin?",
+        "como funciona a caixa de um elemento?",
+        "por que meu elemento ficou maior?",
+        "como calcular tamanho real do elemento?",
+        "o que fica dentro da borda?",
+        "o que fica fora da borda?",
+        "padding aumenta o tamanho?",
+        "margin empurra outros elementos?",
+        "border conta no tamanho?",
+        "como fazer um card com espaçamento interno?",
+        "como separar dois blocos com espaço?",
+        "qual a ordem do box model?",
+        "content padding border margin o que significa?",
+        "como evitar confusão no box model?"
+      ],
+      flexbox: [
+        "o que é flexbox?",
+        "para que serve display flex?",
+        "como centralizar com flexbox?",
+        "como alinhar itens na horizontal?",
+        "como alinhar itens na vertical?",
+        "o que faz justify-content?",
+        "o que faz align-items?",
+        "qual a diferença entre justify-content e align-items?",
+        "como colocar elementos lado a lado?",
+        "como fazer menu com flexbox?",
+        "como usar gap no flexbox?",
+        "o que é eixo principal no flexbox?",
+        "o que é eixo cruzado no flexbox?",
+        "quando usar flex-direction column?",
+        "como inverter a direção no flexbox?",
+        "como distribuir espaço entre os itens?",
+        "como fazer cards em linha com flexbox?",
+        "como centralizar um botão no meio da tela?"
+      ],
+      js: [
+        "o que é javascript?",
+        "para que serve javascript?",
+        "javascript é linguagem de programação?",
+        "qual a diferença entre javascript e java?",
+        "como declarar variável em javascript?",
+        "qual a diferença entre let const e var?",
+        "quando usar let?",
+        "quando usar const?",
+        "o que é função em javascript?",
+        "como fazer um alerta com javascript?",
+        "como reagir a clique com javascript?",
+        "como mudar texto da página com javascript?",
+        "como usar console.log?",
+        "o que é lógica em javascript?",
+        "como começar a aprender javascript?",
+        "javascript roda no navegador?",
+        "javascript mexe no html?",
+        "como criar um contador em javascript?"
+      ],
+      conditionals: [
+        "o que é if no javascript?",
+        "para que serve else?",
+        "como funciona if e else?",
+        "o que é loop?",
+        "como funciona for?",
+        "como funciona while?",
+        "quando usar for?",
+        "quando usar while?",
+        "como repetir uma ação várias vezes?",
+        "como testar se um número é maior que outro?",
+        "como verificar se uma pessoa é maior de idade?",
+        "como fazer condição com duas opções?",
+        "como fazer várias condições?",
+        "o que é operador lógico?",
+        "como usar && e ||?",
+        "como comparar valores no javascript?",
+        "como montar um verificador de nota?",
+        "como saber se um número é par?"
+      ],
+      dom: [
+        "o que é dom?",
+        "para que serve o dom?",
+        "como pegar um elemento com querySelector?",
+        "o que faz addEventListener?",
+        "como mudar texto com javascript?",
+        "como mudar cor de um elemento?",
+        "como reagir a clique no botão?",
+        "como adicionar classe com javascript?",
+        "como remover classe com javascript?",
+        "como criar elemento pelo javascript?",
+        "como adicionar item numa lista?",
+        "como trocar o conteúdo de um título?",
+        "como funciona evento de click?",
+        "como funciona evento de input?",
+        "qual a diferença entre html e dom?",
+        "como manipular a página com javascript?",
+        "como selecionar elemento por id?",
+        "como selecionar elemento por classe?"
+      ],
+      api: [
+        "o que é api?",
+        "para que serve uma api?",
+        "o que é json?",
+        "como funciona fetch?",
+        "como buscar dados de uma api?",
+        "o que é requisição?",
+        "o que é resposta da api?",
+        "o que significa status 200?",
+        "o que significa status 404?",
+        "como transformar resposta em json?",
+        "frontend pode conversar com backend?",
+        "como mostrar dados na tela vindos da api?",
+        "qual a diferença entre frontend e backend?",
+        "como testar uma api?",
+        "como consumir uma api fake?",
+        "o que é endpoint?",
+        "api devolve texto ou objeto?",
+        "como funciona método get?"
+      ],
+      auth: [
+        "o que é autenticação?",
+        "para que serve login?",
+        "o que é sessão?",
+        "o que é token?",
+        "o que é hash de senha?",
+        "por que não guardar senha em texto puro?",
+        "como funciona cadastro e login?",
+        "qual a diferença entre autenticação e autorização?",
+        "frontend sozinho faz login seguro?",
+        "backend valida senha?",
+        "como proteger dados do usuário?",
+        "o que é segurança no login?",
+        "como funciona logout?",
+        "como manter usuário logado?",
+        "o que é cookie de sessão?",
+        "o que é jwt?",
+        "como evitar senha fraca?",
+        "por que segurança não fica só no front-end?"
+      ],
+    };
+
+
+Object.entries(mentorQuestionBank).forEach(([key, questions]) => {
+  if (mentorKnowledge[key]) {
+    mentorKnowledge[key].sampleQuestions = questions.slice();
+  }
+});
+
+const mentorQuestionIndex = Object.entries(mentorQuestionBank).flatMap(([key, questions]) =>
+  questions.map(question => ({
+    key,
+    question,
+    normalized: normalizeText(question),
+    tokens: normalizeText(question).split(/[^a-z0-9<>#.-]+/).filter(token => token && token.length > 2)
+  }))
+);
+
+function tokenizeForMentor(text) {
+  return normalizeText(text)
+    .split(/[^a-z0-9<>#.-]+/)
+    .filter(token => token && token.length > 2);
+}
+
+function scoreQuestionSimilarity(text, topicKey) {
+  const tokens = tokenizeForMentor(text);
+  if (!tokens.length) return 0;
+
+  let best = 0;
+  for (const entry of mentorQuestionIndex) {
+    if (entry.key !== topicKey) continue;
+
+    let score = 0;
+    if (entry.normalized === text) score += 10;
+    if (entry.normalized.includes(text) || text.includes(entry.normalized)) score += 6;
+
+    const overlap = entry.tokens.filter(token => tokens.includes(token)).length;
+    score += overlap * 1.35;
+
+    if (score > best) best = score;
+  }
+
+  return best;
+}
+
+
+    let authMode = 'login';
+    let selectedLesson = null;
+    let quizIndex = 0;
+    let quizSelected = null;
+    let quizHits = 0;
+    let quizAnswered = false;
+    let coachMessages = [
+      { role: 'ai', text: 'Olá. Sou a IA da DewAI. Posso explicar HTML, CSS, JavaScript, sugerir projetos e revisar dúvidas.' }
+    ];
+
+    let mentorMemory = {
+      lastTopicKey: null,
+      lastQuestion: '',
+      lastReplyStyle: 0,
+      lastTopicTitle: ''
+    };
+
+    function getUsers() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_USERS) || '[]'); }
+      catch { return []; }
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
+    }
+
+    function getSession() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_SESSION) || 'null'); }
+      catch { return null; }
+    }
+
+    function saveSession(session) {
+      localStorage.setItem(STORAGE_SESSION, JSON.stringify(session));
+    }
+
+    function uid() {
+      return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    function starterProgress() {
+      return {
+        completedLessons: [],
+        score: 0,
+        level: 1,
+        answered: 0,
+        correct: 0,
+        lastStudyAt: new Date().toISOString(),
+        xpHistory: []
+      };
+    }
+
+    function calcLevel(score) {
+      return Math.max(1, Math.floor(score / 120) + 1);
+    }
+
+    function getRankBadge(score) {
+      if (score >= 900) return 'Lenda Web';
+      if (score >= 600) return 'Mestre Front-end';
+      if (score >= 350) return 'Dev Intermediário';
+      if (score >= 150) return 'Aprendiz Brilhante';
+      return 'Iniciante';
+    }
+
+    function currentUser() {
+      const session = getSession();
+      if (!session?.userId) return null;
+      return getUsers().find(u => u.id === session.userId) || null;
+    }
+
+    function normalizeText(text) {
+      return String(text || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    }
+
+    function getUserTier(user) {
+      const level = user?.progress?.level || 1;
+      if (level <= 2) return 'beginner';
+      if (level <= 5) return 'intermediate';
+      return 'advanced';
+    }
+
+    function pickTopic(message) {
+      const text = normalizeText(message);
+      let bestTopicKey = null;
+      let bestTopic = null;
+      let bestScore = 0;
+
+      for (const [key, topic] of Object.entries(mentorKnowledge)) {
+        let score = 0;
+        for (const keyword of topic.keywords) {
+          const normalizedKeyword = normalizeText(keyword);
+          if (!normalizedKeyword) continue;
+          if (text.includes(normalizedKeyword)) {
+            score += normalizedKeyword.includes(' ') || normalizedKeyword.startsWith('<') ? 3 : 2;
+          }
+        }
+
+        const topicTitle = normalizeText(topic.title);
+        if (topicTitle && text.includes(topicTitle)) score += 3;
+
+        score += scoreQuestionSimilarity(text, key);
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestTopic = topic;
+          bestTopicKey = key;
+        }
+      }
+
+      if (bestScore < 2 && mentorMemory.lastTopicKey && mentorKnowledge[mentorMemory.lastTopicKey]) {
+        const continuationWords = ['mais', 'isso', 'essa', 'esse', 'assim', 'por que', 'porque', 'exemplo', 'explica melhor', 'detalha'];
+        const isLikelyContinuation = continuationWords.some(word => text.includes(normalizeText(word))) || text.length <= 18;
+        if (isLikelyContinuation) {
+          return { key: mentorMemory.lastTopicKey, topic: mentorKnowledge[mentorMemory.lastTopicKey], usedMemory: true, confidence: 0.35 };
+        }
+      }
+
+      if (bestScore < 2) {
+        return { key: null, topic: null, usedMemory: false, confidence: 0 };
+      }
+
+      return { key: bestTopicKey, topic: bestTopic, usedMemory: false, confidence: bestScore };
+    }
+
+    function formatBulletLines(items) {
+      return items.map(item => `• ${item}`).join('\n');
+    }
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getReplyFlavor(index) {
+      const flavors = [
+        {
+          beginner: 'Explicação para seu nível:',
+          intermediate: 'Ponto principal para avançar:',
+          advanced: 'Visão mais madura do tema:',
+          tip: 'Dica da DewAI:\n• Primeiro entenda o porquê. Depois memorize os nomes.'
+        },
+        {
+          beginner: 'Jeito mais simples de entender:',
+          intermediate: 'Resumo útil para praticar:',
+          advanced: 'Leitura mais estratégica do tema:',
+          tip: 'Dica da DewAI:\n• Quando travar, reduza o problema para um exemplo pequeno.'
+        },
+        {
+          beginner: 'Base que você precisa pegar:',
+          intermediate: 'O que mais faz diferença aqui:',
+          advanced: 'Camada mais profunda do assunto:',
+          tip: 'Dica da DewAI:\n• Aprender bem não é correr. É repetir com clareza.'
+        }
+      ];
+      return flavors[index % flavors.length];
+    }
+
+    function getMemoryLead(usedMemory, topicTitle) {
+      if (!usedMemory) return '';
+      return `Continuando a linha da sua pergunta anterior sobre ${topicTitle}:\n\n`;
+    }
+
+    function rememberMentorTurn(topicKey, topicTitle, question) {
+      mentorMemory.lastTopicKey = topicKey;
+      mentorMemory.lastTopicTitle = topicTitle;
+      mentorMemory.lastQuestion = question;
+      mentorMemory.lastReplyStyle = (mentorMemory.lastReplyStyle + 1) % 3;
+    }
+
+    function buildLocalMentorReply(user, message, options = {}) {
+      const tier = getUserTier(user);
+      const topicData = pickTopic(message);
+      const topicKey = topicData.key;
+      const topic = topicData.topic;
+      const text = normalizeText(message);
+      const flavor = getReplyFlavor(mentorMemory.lastReplyStyle);
+
+      if (!topic) {
+        return 'Não consegui ligar sua pergunta a um tema claro ainda.\n\nTenta perguntar de forma mais direta, por exemplo:\n• o que é tag semântica?\n• me explica flexbox\n• o que é DOM?\n• como funciona um formulário HTML?';
+      }
+
+      const wantsSimple = options.mode === 'simple' || ['simples', 'facil', 'fácil', 'resumido'].some(word => text.includes(normalizeText(word)));
+      const wantsExercise = options.mode === 'exercise' || ['exercicio', 'exercício', 'treinar', 'praticar'].some(word => text.includes(normalizeText(word)));
+      const wantsProject = ['projeto', 'projetos', 'ideia', 'ideias'].some(word => text.includes(normalizeText(word)));
+      const wantsExample = ['exemplo', 'codigo', 'código', 'mostra', 'mostrar'].some(word => text.includes(normalizeText(word))) || text.length < 18;
+
+      let tierItems = topic[tier];
+      if (wantsSimple) {
+        tierItems = topic.beginner;
+      }
+
+      let reply = '';
+      reply += getMemoryLead(topicData.usedMemory, mentorMemory.lastTopicTitle || topic.title);
+      reply += `${topic.title}\n\n${topic.intro}\n\n`;
+      reply += `${wantsSimple ? 'Versão mais simples:' : flavor[tier]}\n`;
+      reply += formatBulletLines(tierItems);
+
+      if (wantsExample) {
+        reply += `\n\nExemplo:\n${topic.example}`;
+      }
+
+      if (wantsExercise) {
+        reply += `\n\nExercício rápido:\n• ${topic.exercise}`;
+      } else if (!wantsProject && text.includes('explica')) {
+        reply += `\n\nPara fixar:\n• ${topic.exercise}`;
+      }
+
+      if (wantsProject) {
+        reply += `\n\nProjeto sugerido:\n• ${topic.project}`;
+      }
+
+      reply += `\n\n${flavor.tip}`;
+
+      rememberMentorTurn(topicKey, topic.title, message);
+      return reply;
+    }
+
+    function sendMentorPreset(mode) {
+      const user = currentUser();
+      if (!mentorMemory.lastTopicKey || !mentorKnowledge[mentorMemory.lastTopicKey]) {
+        const fallback = mode === 'simple'
+          ? 'Faz uma pergunta primeiro para eu poder simplificar ela.'
+          : 'Faz uma pergunta primeiro para eu criar um exercício no mesmo tema.';
+        coachMessages.push({ role: 'ai', text: fallback });
+        renderCoach();
+        return;
+      }
+
+      const topic = mentorKnowledge[mentorMemory.lastTopicKey];
+      const syntheticPrompt = mode === 'simple'
+        ? `explica ${topic.title} mais simples`
+        : `me dá exercício sobre ${topic.title}`;
+
+      coachMessages.push({ role: 'user', text: mode === 'simple' ? 'Explicar mais simples' : 'Me dá exercício' });
+      coachMessages.push({ role: 'ai', text: buildLocalMentorReply(user, syntheticPrompt, { mode }) });
+      renderCoach();
+    }
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      const isLogin = mode === 'login';
+      document.getElementById('authTitle').textContent = isLogin ? 'Entrar' : 'Criar conta';
+      document.getElementById('authDesc').textContent = isLogin
+        ? 'Entre na sua jornada na DewAI.'
+        : 'Comece sua evolução como dev com a DewAI.';
+      document.getElementById('authMainBtn').textContent = isLogin ? 'Entrar' : 'Cadastrar';
+      document.getElementById('authToggleBtn').textContent = isLogin ? 'Ainda não tenho conta' : 'Já tenho conta';
+      document.getElementById('nameField').classList.toggle('hidden', isLogin);
+      hideAuthError();
+    }
+
+    function showAuthError(message) {
+      const box = document.getElementById('authError');
+      box.textContent = message;
+      box.classList.remove('hidden');
+    }
+
+    function hideAuthError() {
+      document.getElementById('authError').classList.add('hidden');
+    }
+
+    function register() {
+      const name = document.getElementById('nameInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const users = getUsers();
+
+      hideAuthError();
+
+      if (!name || !email || !password) return showAuthError('Preencha nome, email e senha.');
+      if (password.length < 4) return showAuthError('A senha precisa ter pelo menos 4 caracteres.');
+      if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) return showAuthError('Esse email já está cadastrado.');
+
+      const newUser = {
+        id: uid(),
+        name,
+        email,
+        password,
+        createdAt: new Date().toISOString(),
+        progress: starterProgress()
+      };
+
+      users.push(newUser);
+      saveUsers(users);
+      saveSession({ userId: newUser.id });
+      init();
+    }
+
+    function login() {
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const users = getUsers();
+      hideAuthError();
+
+      const found = users.find(
+        u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      );
+
+      if (!found) return showAuthError('Email ou senha inválidos.');
+
+      saveSession({ userId: found.id });
+      init();
+    }
+
+    function logout() {
+      localStorage.removeItem(STORAGE_SESSION);
+      init();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+
+      const tabs = ['learn', 'coach', 'ranking', 'profile', 'explanation'];
+      tabs.forEach(name => {
+        const el = document.getElementById(`tab-${name}`);
+        if (el) el.classList.toggle('hidden', name !== tab);
+      });
+    }
+
+    function lessonState(lessonId, lessonIndex, completedIds) {
+      const completed = completedIds.includes(lessonId);
+      const locked = lessonIndex > 0 && !completedIds.includes(flatLessons[lessonIndex - 1].id);
+      return { completed, locked };
+    }
+
+
+
+    function renderLearn() {
+      applyTheme(localStorage.getItem(STORAGE_THEME) || 'light');
+      const user = currentUser();
+      const wrap = document.getElementById('tab-learn');
+      const completedIds = user.progress.completedLessons;
+
+      wrap.innerHTML = learningPath.map(section => {
+        const lessonsHtml = section.lessons.map(lesson => {
+          const lessonIndex = flatLessons.findIndex(l => l.id === lesson.id);
+          const state = lessonState(lesson.id, lessonIndex, completedIds);
+
+          let badgeClass = 'mini-open';
+          let badgeText = 'Disponível';
+          if (state.locked) { badgeClass = 'mini-lock'; badgeText = 'Bloqueada'; }
+          if (state.completed) { badgeClass = 'mini-ok'; badgeText = 'Concluída'; }
+
+          return `
+            <div class="lesson-card">
+              <div class="lesson-top">
+                <div>
+                  <h3>${escapeHtml(lesson.title)}</h3>
+                  <div class="profile-sub">Dificuldade ${lesson.difficulty}/7</div>
+                </div>
+                <div class="mini-badge ${badgeClass}">${badgeText}</div>
+              </div>
+              <p>${escapeHtml(lesson.content)}</p>
+              <button class="lesson-btn" ${state.locked ? 'disabled' : ''} onclick="openLesson('${lesson.id}')">
+                ${state.completed ? 'Revisar lição' : 'Iniciar lição'}
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="card section-card">
+            <div class="section-header">
+              <div class="section-icon ${section.color}">${escapeHtml(section.icon)}</div>
+              <div>
+                <h2>${escapeHtml(section.title)}</h2>
+                <p>Do básico ao mais técnico, sem pular degraus.</p>
+              </div>
+            </div>
+            <div class="lessons-grid">${lessonsHtml}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCoach() {
+      const box = document.getElementById('coachMessages');
+      box.innerHTML = coachMessages.map(msg => `
+        <div class="msg ${msg.role}">${escapeHtml(msg.text).replace(/\n/g, '<br>')}</div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function renderRanking() {
+      const users = [...getUsers()].sort((a, b) => b.progress.score - a.progress.score).slice(0, 10);
+      const box = document.getElementById('rankingList');
+      box.innerHTML = users.map((user, i) => `
+        <div class="ranking-item">
+          <div class="ranking-left">
+            <div class="rank-box">#${i + 1}</div>
+            <div>
+              <div><strong>${user.name}</strong></div>
+              <div class="ranking-sub">${getRankBadge(user.progress.score)}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:1.1rem;font-weight:800;">${user.progress.score}</div>
+            <div class="ranking-sub">nível ${user.progress.level}</div>
+          </div>
+        </div>
+      `).join('') || '<div class="profile-sub">Nenhum usuário ainda.</div>';
+    }
+
+    function renderProfile() {
+      const user = currentUser();
+      document.getElementById('profileScore').textContent = user.progress.score;
+      document.getElementById('profileLessons').textContent = user.progress.completedLessons.length;
+      document.getElementById('profileLevel').textContent = user.progress.level;
+      document.getElementById('profileCorrect').textContent = `${user.progress.correct}/${user.progress.answered}`;
+    }
+
+    function updateHeader() {
+      const user = currentUser();
+      const totalLessons = flatLessons.length;
+      const completed = user.progress.completedLessons.length;
+      const accuracy = user.progress.answered > 0 ? Math.round((user.progress.correct / user.progress.answered) * 100) : 0;
+      const progressPercent = totalLessons ? (completed / totalLessons) * 100 : 0;
+
+      document.getElementById('welcomeText').textContent = `Olá, ${user.name}`;
+      document.getElementById('rankBadge').textContent = getRankBadge(user.progress.score);
+      document.getElementById('scoreValue').textContent = user.progress.score;
+      document.getElementById('levelValue').textContent = user.progress.level;
+      document.getElementById('accuracyValue').textContent = accuracy + '%';
+      document.getElementById('progressText').textContent = `${completed}/${totalLessons} lições`;
+      document.getElementById('progressFill').style.width = progressPercent + '%';
+    }
+
+    function openLesson(lessonId) {
+      selectedLesson = flatLessons.find(l => l.id === lessonId);
+      quizIndex = 0;
+      quizSelected = null;
+      quizHits = 0;
+      quizAnswered = false;
+      document.getElementById('quizModal').classList.add('show');
+      renderQuizQuestion();
+    }
+
+    function closeQuiz() {
+      document.getElementById('quizModal').classList.remove('show');
+      selectedLesson = null;
+    }
+
+    function renderQuizQuestion() {
+      const question = selectedLesson.questions[quizIndex];
+      document.getElementById('quizLessonTitle').textContent = selectedLesson.title;
+      document.getElementById('quizStepText').textContent = `Questão ${quizIndex + 1} de ${selectedLesson.questions.length}`;
+      document.getElementById('questionTitle').textContent = question.q;
+      document.getElementById('quizProgressFill').style.width = (((quizIndex + 1) / selectedLesson.questions.length) * 100) + '%';
+      document.getElementById('feedbackBox').classList.remove('show');
+      document.getElementById('feedbackBox').textContent = '';
+      document.getElementById('quizActionBtn').textContent = 'Responder';
+
+      const optionsBox = document.getElementById('optionsBox');
+      optionsBox.innerHTML = '';
+      question.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = option;
+        btn.onclick = () => {
+          if (quizAnswered) return;
+          quizSelected = index;
+          document.querySelectorAll('.option').forEach(el => el.classList.remove('selected'));
+          btn.classList.add('selected');
+        };
+        optionsBox.appendChild(btn);
+      });
+    }
+
+    function submitOrNextQuiz() {
+      const question = selectedLesson.questions[quizIndex];
+      const feedback = document.getElementById('feedbackBox');
+
+      if (!quizAnswered) {
+        if (quizSelected === null) return;
+        quizAnswered = true;
+
+        const optionEls = document.querySelectorAll('.option');
+        optionEls.forEach((el, idx) => {
+          if (idx === question.answer) el.classList.add('correct');
+          else if (idx === quizSelected) el.classList.add('wrong');
+        });
+
+        if (quizSelected === question.answer) quizHits++;
+
+        feedback.innerHTML = `<strong>${quizSelected === question.answer ? 'Acertou.' : 'Quase.'}</strong> ${question.explanation}`;
+        feedback.classList.add('show');
+        document.getElementById('quizActionBtn').textContent = quizIndex < selectedLesson.questions.length - 1 ? 'Próxima' : 'Finalizar';
+        return;
+      }
+
+      if (quizIndex < selectedLesson.questions.length - 1) {
+        quizIndex++;
+        quizSelected = null;
+        quizAnswered = false;
+        renderQuizQuestion();
+      } else {
+        finishLesson();
+      }
+    }
+
+    function finishLesson() {
+      const user = currentUser();
+      const users = getUsers();
+      const perfect = quizHits === selectedLesson.questions.length;
+      const gainedScore = quizHits * 25 + (perfect ? 20 : 0) + selectedLesson.difficulty * 5;
+
+      const updatedUsers = users.map(u => {
+        if (u.id !== user.id) return u;
+        const completedLessons = u.progress.completedLessons.includes(selectedLesson.id)
+          ? u.progress.completedLessons
+          : [...u.progress.completedLessons, selectedLesson.id];
+        const score = u.progress.score + gainedScore;
+        const answered = u.progress.answered + selectedLesson.questions.length;
+        const correct = u.progress.correct + quizHits;
+
+        return {
+          ...u,
+          progress: {
+            ...u.progress,
+            completedLessons,
+            score,
+            answered,
+            correct,
+            level: calcLevel(score),
+            lastStudyAt: new Date().toISOString(),
+            xpHistory: [...u.progress.xpHistory, { lessonId: selectedLesson.id, gainedScore, at: new Date().toISOString() }]
+          }
+        };
+      });
+
+      saveUsers(updatedUsers);
+      closeQuiz();
+      renderApp();
+    }
+
+    function sendCoachMessage() {
+      const input = document.getElementById('coachInput');
+      const text = input.value.trim();
+      if (!text) return;
+      const user = currentUser();
+      coachMessages.push({ role: 'user', text });
+      try {
+        coachMessages.push({ role: 'ai', text: buildLocalMentorReply(user, text) });
+      } catch (error) {
+        console.error('Erro no mentor:', error);
+        coachMessages.push({ role: 'ai', text: 'Tive um erro ao montar a resposta. Tenta perguntar de novo de um jeito mais direto.' });
+      }
+      input.value = '';
+      renderCoach();
+    }
+
+    function renderApp() {
+      updateHeader();
+      renderLearn();
+      renderCoach();
+      renderRanking();
+      renderProfile();
+    }
+
+    function applyTheme(theme) {
+      document.body.classList.toggle('dark', theme === 'dark');
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) btn.textContent = theme === 'dark' ? '☀️ Modo claro' : '🌙 Modo escuro';
+    }
+
+    function toggleTheme() {
+      const current = localStorage.getItem(STORAGE_THEME) || 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(STORAGE_THEME, next);
+      applyTheme(next);
+    }
+
+    function init() {
+      applyTheme(localStorage.getItem(STORAGE_THEME) || 'light');
+      const user = currentUser();
+      const authScreen = document.getElementById('authScreen');
+      const appScreen = document.getElementById('appScreen');
+
+      if (user) {
+        authScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
+        renderApp();
+      } else {
+        authScreen.classList.remove('hidden');
+        appScreen.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('authToggleBtn').addEventListener('click', () => {
+      setAuthMode(authMode === 'login' ? 'register' : 'login');
+    });
+
+    document.getElementById('authMainBtn').addEventListener('click', () => {
+      if (authMode === 'login') login();
+      else register();
+    });
+
+    document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('closeQuizBtn').addEventListener('click', closeQuiz);
+    document.getElementById('quizActionBtn').addEventListener('click', submitOrNextQuiz);
+    document.getElementById('sendCoachBtn').addEventListener('click', sendCoachMessage);
+    document.getElementById('simplifyCoachBtn').addEventListener('click', () => sendMentorPreset('simple'));
+    document.getElementById('exerciseCoachBtn').addEventListener('click', () => sendMentorPreset('exercise'));
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('coachInput').addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        sendCoachMessage();
+      }
+    });
+
+    setAuthMode('login');
+    switchTab('learn');
+    init();
+  </script>
+</body>
+</html>
