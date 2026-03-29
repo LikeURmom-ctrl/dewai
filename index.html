@@ -480,6 +480,7 @@
       margin-bottom: 10px;
       line-height: 1.5;
       font-size: .95rem;
+      white-space: pre-wrap;
     }
 
     .msg.ai {
@@ -657,6 +658,7 @@
       font-family: monospace;
       font-size: 0.85rem;
       border: 1px solid var(--border);
+      white-space: pre-wrap;
     }
 
     @media (max-width: 1024px) {
@@ -1242,7 +1244,6 @@ document.getElementById('btn').onclick = () => {
 
     const flatLessons = learningPath.flatMap(section => section.lessons);
 
-
     const mentorKnowledge = {
       html: {
         title: 'HTML',
@@ -1724,49 +1725,278 @@ document.getElementById('btn').onclick = () => {
       ],
     };
 
+    Object.entries(mentorQuestionBank).forEach(([key, questions]) => {
+      if (mentorKnowledge[key]) {
+        mentorKnowledge[key].sampleQuestions = questions.slice();
+      }
+    });
 
-Object.entries(mentorQuestionBank).forEach(([key, questions]) => {
-  if (mentorKnowledge[key]) {
-    mentorKnowledge[key].sampleQuestions = questions.slice();
-  }
-});
+    const mentorQuestionIndex = Object.entries(mentorQuestionBank).flatMap(([key, questions]) =>
+      questions.map(question => ({
+        key,
+        question,
+        normalized: normalizeText(question),
+        tokens: normalizeText(question).split(/[^a-z0-9<>#.-]+/).filter(token => token && token.length > 2)
+      }))
+    );
 
-const mentorQuestionIndex = Object.entries(mentorQuestionBank).flatMap(([key, questions]) =>
-  questions.map(question => ({
-    key,
-    question,
-    normalized: normalizeText(question),
-    tokens: normalizeText(question).split(/[^a-z0-9<>#.-]+/).filter(token => token && token.length > 2)
-  }))
-);
+    const lessonTopicMap = {
+      'html-1': 'html',
+      'html-2': 'semantic',
+      'html-3': 'forms',
+      'css-1': 'css',
+      'css-2': 'boxmodel',
+      'css-3': 'flexbox',
+      'js-1': 'js',
+      'js-2': 'conditionals',
+      'js-3': 'dom',
+      'adv-1': 'api',
+      'adv-2': 'auth'
+    };
 
-function tokenizeForMentor(text) {
-  return normalizeText(text)
-    .split(/[^a-z0-9<>#.-]+/)
-    .filter(token => token && token.length > 2);
-}
+    const mentorSpecificAnswers = {
+      'qual a diferenca entre html e css': 'HTML define a estrutura e o conteúdo da página. CSS cuida da aparência, como cores, tamanhos, espaçamentos e layout. Em resumo: HTML monta, CSS estiliza.',
+      'qual a diferenca entre html e javascript': 'HTML cria a estrutura da página. JavaScript adiciona comportamento e interatividade. Em resumo: HTML mostra o que existe, JavaScript faz aquilo reagir.',
+      'qual a diferenca entre div e section': '<div> é um bloco genérico sem significado semântico. <section> representa uma seção temática do conteúdo. Use <section> quando houver um bloco com assunto próprio.',
+      'qual a diferenca entre section e article': '<section> agrupa conteúdo relacionado dentro de um tema. <article> representa um conteúdo independente, como notícia, post ou card que poderia existir sozinho.',
+      'qual a diferenca entre label e placeholder': 'Label é o texto que identifica de verdade o campo e melhora acessibilidade. Placeholder é só uma dica temporária dentro do input. Placeholder não substitui label.',
+      'qual a diferenca entre classe e id': 'Classe pode ser reutilizada em vários elementos. ID deve ser único na página. Em CSS, classe usa ponto e ID usa #.',
+      'qual a diferenca entre justify-content e align-items': 'justify-content organiza no eixo principal do flexbox. align-items organiza no eixo cruzado. Se a direção for row, justify-content mexe na horizontal e align-items na vertical.',
+      'qual a diferenca entre javascript e java': 'JavaScript e Java são linguagens diferentes. JavaScript é muito usado no navegador para interatividade. Java é outra linguagem, comum em back-end, apps Android antigos e sistemas maiores.',
+      'qual a diferenca entre autenticacao e autorizacao': 'Autenticação responde quem é você. Autorização responde o que você pode fazer. Primeiro o sistema confirma sua identidade, depois decide suas permissões.',
+      'frontend sozinho faz login seguro': 'Não. O front-end sozinho não faz login seguro. A validação real da senha e da sessão deve acontecer no back-end.',
+      'backend valida senha': 'Sim. Em sistemas reais, o back-end recebe os dados, compara com hash seguro e decide se o login é válido.',
+      'por que nao guardar senha em texto puro': 'Porque qualquer vazamento expõe a senha real do usuário. O correto é armazenar hash seguro, não a senha original.',
+      'por que seguranca nao fica so no front-end': 'Porque o código do front-end roda no navegador do usuário e pode ser visto ou alterado. Regras críticas e proteção de dados precisam ficar no servidor.',
+      'toda pagina precisa de main': 'Quase toda página de conteúdo deve ter um <main> para marcar a parte principal. O ideal é ter apenas um <main> por documento.',
+      'usar tag semantica melhora seo': 'Sim, ajuda. Tags semânticas deixam a estrutura mais clara para ferramentas e mecanismos de busca entenderem melhor a página.',
+      'tag semantica melhora acessibilidade': 'Sim. Leitores de tela e navegação assistiva entendem melhor a função de cada parte quando a estrutura é semântica.',
+      'padding aumenta o tamanho': 'Sim, no box model padrão o padding entra no tamanho total renderizado do elemento.',
+      'border conta no tamanho': 'Sim. A borda também entra no tamanho visual final do elemento.',
+      'margin empurra outros elementos': 'Sim. Margin cria espaço externo e afasta o elemento dos outros ao redor.',
+      'javascript roda no navegador': 'Sim. JavaScript roda no navegador e controla interação, eventos, DOM e várias partes do front-end.',
+      'javascript mexe no html': 'Sim. Pelo DOM, o JavaScript pode trocar texto, classes, estilos, atributos e criar ou remover elementos.',
+      'frontend pode conversar com backend': 'Sim. Isso normalmente é feito com requisições HTTP, como fetch, para enviar e receber dados.',
+      'api devolve texto ou objeto': 'Pode devolver vários formatos, mas no desenvolvimento web JSON é um dos mais comuns. Depois você converte a resposta para objeto no JavaScript.',
+      'como funciona metodo get': 'GET é usado para buscar dados. Normalmente você pede informações ao servidor sem alterar o recurso.',
+      'o que significa status 200': 'Status 200 significa que a requisição foi concluída com sucesso.',
+      'o que significa status 404': 'Status 404 significa que o recurso pedido não foi encontrado.',
+      'como manter usuario logado': 'Isso costuma ser feito com sessão, cookie seguro ou token válido controlado pelo back-end.',
+      'como funciona logout': 'Logout encerra a sessão atual ou invalida o token, fazendo o sistema parar de reconhecer o usuário como autenticado.'
+    };
 
-function scoreQuestionSimilarity(text, topicKey) {
-  const tokens = tokenizeForMentor(text);
-  if (!tokens.length) return 0;
+    function createMentorAnswerEntry(topicKey, question, answer, source = 'generated') {
+      const normalized = normalizeText(question);
+      return {
+        topicKey,
+        question,
+        answer,
+        source,
+        normalized,
+        tokens: tokenizeForMentor(normalized)
+      };
+    }
 
-  let best = 0;
-  for (const entry of mentorQuestionIndex) {
-    if (entry.key !== topicKey) continue;
+    function getTopicByKey(topicKey) {
+      return mentorKnowledge[topicKey] || null;
+    }
 
-    let score = 0;
-    if (entry.normalized === text) score += 10;
-    if (entry.normalized.includes(text) || text.includes(entry.normalized)) score += 6;
+    function buildGenericTopicAnswer(topicKey, question) {
+      const topic = getTopicByKey(topicKey);
+      if (!topic) return 'Não encontrei um tema claro para responder isso agora.';
 
-    const overlap = entry.tokens.filter(token => tokens.includes(token)).length;
-    score += overlap * 1.35;
+      const q = normalizeText(question);
 
-    if (score > best) best = score;
-  }
+      if (mentorSpecificAnswers[q]) {
+        return mentorSpecificAnswers[q];
+      }
 
-  return best;
-}
+      const lines = [];
+      const intro = topic.intro;
+      const beginner1 = topic.beginner?.[0] || '';
+      const beginner2 = topic.beginner?.[1] || '';
+      const intermediate1 = topic.intermediate?.[0] || '';
+      const advanced1 = topic.advanced?.[0] || '';
 
+      if (q.includes('o que e') || q.includes('o que sao') || q.includes('o que são')) {
+        lines.push(`${topic.title}: ${intro}`);
+        if (beginner1) lines.push(`Em resumo: ${beginner1}`);
+        if (beginner2) lines.push(`Outra forma de ver: ${beginner2}`);
+      } else if (q.includes('para que serve')) {
+        lines.push(`${topic.title} serve para resolver esta parte do desenvolvimento:`);
+        if (beginner1) lines.push(`• ${beginner1}`);
+        if (intermediate1) lines.push(`• ${intermediate1}`);
+      } else if (q.includes('como ')) {
+        lines.push(`Jeito simples de começar com ${topic.title}:`);
+        if (beginner1) lines.push(`• ${beginner1}`);
+        if (beginner2) lines.push(`• ${beginner2}`);
+        lines.push(`• Teste em um exemplo pequeno primeiro.`);
+        if (topic.example) lines.push(`Exemplo:\n${topic.example}`);
+      } else if (q.includes('quando usar')) {
+        lines.push(`Você usa ${topic.title} quando precisa deste papel na página ou no sistema:`);
+        if (intermediate1) lines.push(`• ${intermediate1}`);
+        if (advanced1) lines.push(`• ${advanced1}`);
+      } else if (q.includes('por que')) {
+        lines.push(`O motivo principal é este:`);
+        lines.push(`• ${intro}`);
+        if (intermediate1) lines.push(`• ${intermediate1}`);
+      } else if (q.includes('qual a funcao') || q.includes('qual a função') || q.includes('o que faz')) {
+        lines.push(`Função principal de ${topic.title}:`);
+        lines.push(`• ${intro}`);
+        if (beginner1) lines.push(`• ${beginner1}`);
+      } else {
+        lines.push(`${topic.title}: ${intro}`);
+        if (beginner1) lines.push(`• ${beginner1}`);
+        if (intermediate1) lines.push(`• ${intermediate1}`);
+      }
+
+      if (q.includes('exemplo') || q.includes('codigo') || q.includes('código') || q.includes('estrutura')) {
+        if (topic.example) {
+          lines.push(`Exemplo:\n${topic.example}`);
+        }
+      }
+
+      if (topic.exercise) {
+        lines.push(`Prática rápida: ${topic.exercise}`);
+      }
+
+      return lines.join('\n');
+    }
+
+    function buildGeneratedQuestionAnswers() {
+      const entries = [];
+
+      Object.entries(mentorQuestionBank).forEach(([topicKey, questions]) => {
+        questions.forEach(question => {
+          const answer = buildGenericTopicAnswer(topicKey, question);
+
+          entries.push(createMentorAnswerEntry(
+            topicKey,
+            question,
+            answer,
+            'question-bank'
+          ));
+
+          entries.push(createMentorAnswerEntry(
+            topicKey,
+            `me explica ${question.replace(/\?+$/, '')}`,
+            answer,
+            'question-bank-variant'
+          ));
+        });
+      });
+
+      return entries;
+    }
+
+    function buildLessonDirectAnswers() {
+      const entries = [];
+
+      flatLessons.forEach(lesson => {
+        const topicKey = lessonTopicMap[lesson.id] || null;
+
+        lesson.questions.forEach(question => {
+          const correctOption = question.options[question.answer];
+          const answer = [
+            `Essa dúvida aparece na lição "${lesson.title}".`,
+            `Resposta correta: ${correctOption}.`,
+            `${question.explanation}`,
+            `Resumo da lição: ${lesson.content}`
+          ].join('\n');
+
+          entries.push(createMentorAnswerEntry(
+            topicKey,
+            question.q,
+            answer,
+            'lesson-question'
+          ));
+
+          entries.push(createMentorAnswerEntry(
+            topicKey,
+            `qual a resposta de ${question.q}`,
+            answer,
+            'lesson-question-variant'
+          ));
+
+          entries.push(createMentorAnswerEntry(
+            topicKey,
+            `me explica a pergunta ${question.q}`,
+            answer,
+            'lesson-question-variant'
+          ));
+        });
+      });
+
+      return entries;
+    }
+
+    function buildMentorDirectAnswers() {
+      return [
+        ...buildGeneratedQuestionAnswers(),
+        ...buildLessonDirectAnswers()
+      ];
+    }
+
+    const mentorDirectAnswerIndex = buildMentorDirectAnswers();
+
+    function findDirectMentorAnswer(message) {
+      const text = normalizeText(message);
+      if (!text) return null;
+
+      const tokens = tokenizeForMentor(text);
+      if (!tokens.length && text.length < 3) return null;
+
+      let best = null;
+      let bestScore = 0;
+
+      for (const entry of mentorDirectAnswerIndex) {
+        let score = 0;
+
+        if (entry.normalized === text) score += 16;
+        if (entry.normalized.includes(text) || text.includes(entry.normalized)) score += 8;
+
+        const overlap = entry.tokens.filter(token => tokens.includes(token)).length;
+        score += overlap * 1.6;
+
+        if (mentorMemory.lastTopicKey && mentorMemory.lastTopicKey === entry.topicKey) {
+          score += 1.25;
+        }
+
+        if (score > bestScore) {
+          bestScore = score;
+          best = entry;
+        }
+      }
+
+      return bestScore >= 6 ? best : null;
+    }
+
+    function tokenizeForMentor(text) {
+      return normalizeText(text)
+        .split(/[^a-z0-9<>#.-]+/)
+        .filter(token => token && token.length > 2);
+    }
+
+    function scoreQuestionSimilarity(text, topicKey) {
+      const tokens = tokenizeForMentor(text);
+      if (!tokens.length) return 0;
+
+      let best = 0;
+      for (const entry of mentorQuestionIndex) {
+        if (entry.key !== topicKey) continue;
+
+        let score = 0;
+        if (entry.normalized === text) score += 10;
+        if (entry.normalized.includes(text) || text.includes(entry.normalized)) score += 6;
+
+        const overlap = entry.tokens.filter(token => tokens.includes(token)).length;
+        score += overlap * 1.35;
+
+        if (score > best) best = score;
+      }
+
+      return best;
+    }
 
     let authMode = 'login';
     let selectedLesson = null;
@@ -1946,11 +2176,32 @@ function scoreQuestionSimilarity(text, topicKey) {
 
     function buildLocalMentorReply(user, message, options = {}) {
       const tier = getUserTier(user);
+      const text = normalizeText(message);
+      const flavor = getReplyFlavor(mentorMemory.lastReplyStyle);
+
+      const directAnswer = findDirectMentorAnswer(message);
+      if (directAnswer) {
+        const topic = directAnswer.topicKey ? mentorKnowledge[directAnswer.topicKey] : null;
+        const topicTitle = topic?.title || 'esse tema';
+
+        if (topic) {
+          rememberMentorTurn(directAnswer.topicKey, topic.title, message);
+        }
+
+        const lead =
+          mentorMemory.lastTopicKey &&
+          directAnswer.topicKey &&
+          mentorMemory.lastTopicKey === directAnswer.topicKey &&
+          text.length <= 40
+            ? `Continuando sobre ${topicTitle}:\n\n`
+            : '';
+
+        return `${lead}${directAnswer.answer}\n\nDica da DewAI:\n• Se quiser, eu também posso explicar isso de forma mais simples, com exemplo ou com exercício.`;
+      }
+
       const topicData = pickTopic(message);
       const topicKey = topicData.key;
       const topic = topicData.topic;
-      const text = normalizeText(message);
-      const flavor = getReplyFlavor(mentorMemory.lastReplyStyle);
 
       if (!topic) {
         return 'Não consegui ligar sua pergunta a um tema claro ainda.\n\nTenta perguntar de forma mais direta, por exemplo:\n• o que é tag semântica?\n• me explica flexbox\n• o que é DOM?\n• como funciona um formulário HTML?';
@@ -2101,8 +2352,6 @@ function scoreQuestionSimilarity(text, topicKey) {
       const locked = lessonIndex > 0 && !completedIds.includes(flatLessons[lessonIndex - 1].id);
       return { completed, locked };
     }
-
-
 
     function renderLearn() {
       applyTheme(localStorage.getItem(STORAGE_THEME) || 'light');
@@ -2391,6 +2640,8 @@ function scoreQuestionSimilarity(text, topicKey) {
         sendCoachMessage();
       }
     });
+
+    console.log('Mentor IA local carregado com', mentorDirectAnswerIndex.length, 'respostas indexadas.');
 
     setAuthMode('login');
     switchTab('learn');
